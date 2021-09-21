@@ -1,6 +1,9 @@
 #pragma once
 
-#include <map>
+#include "isettings.h"
+
+#include <cassert>
+#include <memory>
 
 /**
  * @brief The SettingsSingleton class
@@ -14,24 +17,18 @@
 class SettingsSingleton
 {
 public:
-    enum class Parameter {
-        PinCode,
-        AlarmTemperature,
-        PortNumber,
-        InstallationId
-    };
-
+    static void initialize(std::unique_ptr<ISettings> implementation);
     static SettingsSingleton *instance();
 
-    bool hasValue(const Parameter &parameter) const;
-    int value(const Parameter &parameter) const;
+    bool hasValue(const ISettings::Parameter &parameter) const;
+    int value(const ISettings::Parameter &parameter) const;
 
 
 private:
-    SettingsSingleton();
+    SettingsSingleton() = default;
 
     static SettingsSingleton *m_instance;
 
-    std::map<Parameter, int> m_values;
+    std::unique_ptr<ISettings> m_implementation;
 };
 

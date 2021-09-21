@@ -1,18 +1,20 @@
 #include "settingssingleton.h"
 
-#include <fstream>
 #include <iostream>
 
 SettingsSingleton* SettingsSingleton::m_instance = nullptr;
 
-constexpr const auto settingsFile = "settings.data";
+
+void SettingsSingleton::initialize(std::unique_ptr<ISettings> implementation)
+{
+    assert(m_instance == nullptr);
+    m_instance = new SettingsSingleton();
+    m_instance->m_implementation = std::move(implementation);
+}
 
 SettingsSingleton *SettingsSingleton::instance()
 {
-    if (m_instance == nullptr) {
-        m_instance = new SettingsSingleton();
-    }
-
+    assert(m_instance != nullptr);
     return m_instance;
 }
 
@@ -21,9 +23,12 @@ SettingsSingleton *SettingsSingleton::instance()
  * @param parameter Parameter to ask for
  * @return True if the parameter has a valid value, otherwise false
  */
-bool SettingsSingleton::hasValue(const SettingsSingleton::Parameter &parameter) const
+bool SettingsSingleton::hasValue(const ISettings::Parameter &parameter) const
 {
-    return m_values.find(parameter) != m_values.end();
+    if (m_implementation) {
+        return m_implementation->hasValue(parameter);
+    }
+    return false;
 }
 
 /**
@@ -34,26 +39,10 @@ bool SettingsSingleton::hasValue(const SettingsSingleton::Parameter &parameter) 
  * Make sure to check that the parameter has a valid value
  * by calling SettingsSingleton::hasValue() before.
  */
-int SettingsSingleton::value(const SettingsSingleton::Parameter &parameter) const
+int SettingsSingleton::value(const ISettings::Parameter &parameter) const
 {
-    if (hasValue(parameter)) {
-        return m_values.at(parameter);
+    if (m_implementation) {
+        return m_implementation->value(parameter);
     }
     return -1;
-}
-
-SettingsSingleton::SettingsSingleton()
-{
-    std::ifstream inFile;
-
-    int parameter = 0;
-    int value = 0;
-
-    inFile.open(settingsFile, std::ifstream::in);
-
-    while(inFile >> parameter >> value)
-    {
-        auto p = static_cast<Parameter>(parameter);
-        m_values[p] = value;
-    }
 }

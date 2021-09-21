@@ -1,8 +1,13 @@
 #include <iostream>
+#include <memory>
 #include "pincode.h"
+#include "settingsimpl.h"
+#include "settingssingleton.h"
 
 int main()
 {
+    SettingsSingleton::initialize(std::make_unique<SettingsImpl>());
+
     PinCode pinCode;
 
     std::cout << "Pin code 1234 ";

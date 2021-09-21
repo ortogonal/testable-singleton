@@ -8,7 +8,7 @@
  */
 bool PinCode::validPinCode(const int enteredPinCode) const
 {
-    auto parameter = SettingsSingleton::Parameter::PinCode;
+    auto parameter = ISettings::Parameter::PinCode;
 
     if (SettingsSingleton::instance()->hasValue(parameter)) {
         return SettingsSingleton::instance()->value(parameter) == enteredPinCode;
